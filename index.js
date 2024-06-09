@@ -28,6 +28,8 @@ async function run() {
 
         const productsCollection = client.db('productDB').collection('product');
 
+        const userCollection = client.db('productDB').collection('users');
+
         app.get('/products', async(req, res) =>{
             const cursor = productsCollection.find();
             const result = await cursor.toArray();
@@ -66,12 +68,50 @@ async function run() {
         res.send(result);
        })
 
+    //    user signin and signup 
+
+       app.patch('/users', async(req, res) =>{
+        const user = req.body;
+        const filter = {email: user.email}
+        const updatedDoc = {
+            $set: {
+                lastLoggedAt: user.lastLoggedAt
+            }
+        }
+        const result = await userCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+       })
+
        app.delete('/products/:id', async(req, res) =>{
             const id = req.params.id;
             console.log(id);
             const query = {_id: new ObjectId(id)}
             const result = await productsCollection.deleteOne(query);
             res.send(result);
+       })
+
+
+    //    user data get
+
+    app.get('/users', async(req, res) =>{
+        const cursor = userCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+    })
+
+    //    user connect to MongoDB
+
+       app.post('/users', async(req, res) =>{
+        const user = req.body;
+        const result = await userCollection.insertOne(user);
+        res.send(result);
+       })
+
+       app.delete('/users/:id', async(req, res) =>{
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)}
+        const result = await userCollection.deleteOne(query);
+        res.send(result);
        })
 
         // Send a ping to confirm a successful connection
